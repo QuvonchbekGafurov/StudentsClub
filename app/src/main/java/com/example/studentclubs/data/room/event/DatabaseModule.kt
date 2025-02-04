@@ -2,8 +2,8 @@ package com.example.studentclubs.data
 
 import android.content.Context
 import androidx.room.Room
-import com.example.studentclubs.data.room.EventDao
-import com.example.studentclubs.data.room.EventDatabase
+import com.example.studentclubs.data.room.event.EventDao
+import com.example.studentclubs.data.room.event.EventDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

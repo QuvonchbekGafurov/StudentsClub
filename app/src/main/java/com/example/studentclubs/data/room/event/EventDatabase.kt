@@ -6,10 +6,11 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-@Database(entities = [EventEntity::class], version = 2, exportSchema = false)
+@Database(entities = [EventEntity::class, ProfileEntity::class], version = 3, exportSchema = false)
 abstract class EventDatabase : RoomDatabase() {
 
     abstract fun eventDao(): EventDao
+    abstract fun profileDao(): ProfileDao
 
     companion object {
         @Volatile
@@ -22,17 +23,18 @@ abstract class EventDatabase : RoomDatabase() {
                     EventDatabase::class.java,
                     "event_database"
                 )
-                    .addMigrations(MIGRATION_1_2) // Migration qo'shish
+                    .addMigrations(MIGRATION_1_2)  // Avvalgi migration
+                    .addMigrations(MIGRATION_2_3)  // Yangi ProfileEntity uchun migration
                     .fallbackToDestructiveMigration()  // Agar eski ma'lumotlar kerak bo'lmasa
                     .build()
                 INSTANCE = instance
                 instance
             }
         }
-        // Migration 1 dan 2 ga
+
+        // Avvalgi Migration (1 → 2)
         val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                // Yangi jadvalni yaratish
                 database.execSQL("CREATE TABLE IF NOT EXISTS `events_new` (" +
                         "`id` INTEGER PRIMARY KEY NOT NULL," +
                         "`category` TEXT NOT NULL," +
@@ -43,18 +45,26 @@ abstract class EventDatabase : RoomDatabase() {
                         "`leader` TEXT NOT NULL," +
                         "`photo` TEXT," +
                         "`participant` INTEGER NOT NULL)")
-
-                // Eski jadvaldan yangi jadvalga ma'lumotlarni ko'chirish
                 database.execSQL("INSERT INTO events_new SELECT * FROM events")
-
-                // Eski jadvalni o'chirish
                 database.execSQL("DROP TABLE events")
-
-                // Yangi jadvalni eski jadval nomi bilan almashtirish
                 database.execSQL("ALTER TABLE events_new RENAME TO events")
             }
         }
+
+        // Yangi ProfileEntity Migration (2 → 3)
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `profiles` (" +
+                            "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                            "`name` TEXT NOT NULL, " +
+                            "`lastname` TEXT NOT NULL, " +
+                            "`username` TEXT NOT NULL, " +
+                            "`password` TEXT NOT NULL, " +
+                            "`imageUrl` TEXT, " +
+                            "`nomer` TEXT NOT NULL)"
+                )
+            }
+        }
     }
-
-
 }
