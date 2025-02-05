@@ -4,15 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import com.example.studentclubs.screen.MainScreen
+
+import androidx.navigation.compose.rememberNavController
+import com.example.studentclubs.mainnavigation.MainNavigationGraph
+
 import com.example.studentclubs.ui.theme.StudentClubsTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -23,7 +18,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             StudentClubsTheme {
-                MainScreen()
+                val navController = rememberNavController()
+                MainNavigationGraph(navController)
             }
         }
     }

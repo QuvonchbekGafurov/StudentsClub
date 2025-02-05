@@ -1,7 +1,7 @@
 package com.example.studentclubs
 
 import android.content.Context
-import com.example.studentclubs.data.room.EventEntity
+import com.example.studentclubs.students.data.room.event.EventEntity
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
