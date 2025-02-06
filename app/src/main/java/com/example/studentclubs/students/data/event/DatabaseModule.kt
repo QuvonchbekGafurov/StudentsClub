@@ -1,4 +1,4 @@
-package com.example.studentclubs.students.data.room.event
+package com.example.studentclubs.students.data.event
 
 import android.content.Context
 import androidx.room.Room

@@ -19,6 +19,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -27,28 +28,31 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.example.studentclubs.R
+import com.example.studentclubs.register.utils.AuthOption
 import com.example.studentclubs.register.utils.MyTextField
 import com.example.studentclubs.students.data.ProfileViewModel
-import com.example.studentclubs.students.data.room.profile.ProfileEntity
+import com.example.studentclubs.students.data.profile.ProfileEntity
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun RegisterScreen(modifier: Modifier = Modifier,navController: NavHostController) {
-    var email by remember { mutableStateOf("") }
+fun RegisterScreen(navController: NavHostController) {
+    var username by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val viewModel: ProfileViewModel = hiltViewModel()
-    val profile by viewModel.profile.observeAsState()
+    val profile by viewModel.profile.collectAsState()
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.SpaceAround,
@@ -68,11 +72,21 @@ fun RegisterScreen(modifier: Modifier = Modifier,navController: NavHostControlle
             fontWeight = FontWeight.SemiBold,
             fontSize = 30.sp
         )
-
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            AuthOption(image = R.drawable.google)
+            AuthOption(image = R.drawable.apple)
+            AuthOption(
+                image = R.drawable.facebook,
+                tint = MaterialTheme.colorScheme.onBackground
+            )
+        }
         MyTextField(
-            value = email,
-            onValueChange = { email = it },
-            hint = "Email",
+            value = username,
+            onValueChange = { username = it },
+            hint = "Username",
             leadingIcon = Icons.Outlined.Email,
             keyboardType = KeyboardType.Email,
             modifier = Modifier.fillMaxWidth()
@@ -99,10 +113,17 @@ fun RegisterScreen(modifier: Modifier = Modifier,navController: NavHostControlle
 
         Button(
             onClick = {
-                Log.d("RegisterScreen", "Register clicked with Email: $email, Name: $name, Password: $password")
+                Log.d("RegisterScreen", "Register clicked with Email: $username, Name: $name, Password: $password")
                 Log.d("RegisterScreen", "Login Register")
-                if(email.isNotEmpty()&& name.isNotEmpty() && password.isNotEmpty()){
-                    val newUser = ProfileEntity(username = email, name = name, password = password, nomer = "", lastname = "", imageUrl = "")
+                if(username.isNotEmpty()&& name.isNotEmpty() && password.isNotEmpty()){
+                    val newUser = ProfileEntity(
+                        username = username,
+                        name = name,
+                        password = password,
+                        nomer = "",
+                        lastname = "",
+                        imageUrl = ""
+                    )
                     viewModel.saveProfile(newUser)
                     navController.navigate("login")
                 }

@@ -1,4 +1,4 @@
-package com.example.studentclubs.students.data.room.profile
+package com.example.studentclubs.students.data.profile
 
 import android.content.Context
 import androidx.room.Room

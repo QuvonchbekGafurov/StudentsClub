@@ -2,6 +2,7 @@ package com.example.studentclubs.students
 
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -42,6 +43,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.studentclubs.ui.theme.StudentClubsTheme
 import kotlinx.coroutines.launch
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.example.studentclubs.students.data.EventViewModel
 import com.example.studentclubs.students.navigation.NavBarBody
 import com.example.studentclubs.students.navigation.NavBarHeader
@@ -52,10 +54,13 @@ import com.example.studentclubs.students.navigation.SetUpNavGraph
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StudentScreen() {
+fun StudentScreen(navControllerTOP: NavController) {
 
     val eventViewModel: EventViewModel = hiltViewModel()
-    val events by eventViewModel.allEvents.observeAsState(emptyList())
+    val events by eventViewModel.allEvents.collectAsState(emptyList())
+    BackHandler {
+        // Hech narsa qilmaslik, orqa tugmasi bosilganda hech narsa bajarilmaydi
+    }
 
 
     val systemTheme = isSystemInDarkTheme()
@@ -68,20 +73,7 @@ fun StudentScreen() {
             Icons.Filled.Person,
             Icons.Outlined.Person
         ),
-        NavigationItem(
-            "Notification",
-            Screens.Notification.route,
-            Icons.Filled.Notifications,
-            Icons.Outlined.Notifications,
-            9
-        ),
-        NavigationItem(
-            "Setting",
-            Screens.Setting.route,
-            Icons.Filled.Settings,
-            Icons.Outlined.Settings
-        ),
-        NavigationItem("Share", "share", Icons.Filled.Share, Icons.Outlined.Share),
+
     )
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -136,7 +128,7 @@ fun StudentScreen() {
                     )
                 }
             ) { innerPadding ->
-                SetUpNavGraph(navController, innerPadding)
+                SetUpNavGraph(navController, innerPadding, navControllerTop = navControllerTOP)
             }
         }
     }

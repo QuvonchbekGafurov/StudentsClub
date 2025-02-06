@@ -1,8 +1,10 @@
 package com.example.studentclubs.register.utils
 
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -18,11 +20,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun MyTextField(
@@ -40,7 +45,12 @@ fun MyTextField(
 ) {
     if (isPassword) {
         PasswordTextField(
-            modifier = modifier,
+            modifier = modifier.clip(RoundedCornerShape(12.dp))  // Apply rounded corners
+                .border(
+                    width = 2.dp,  // Set the border width
+                    color = Color.LightGray,  // Set the border color (you can replace with any color)
+                    shape = RoundedCornerShape(12.dp)  // Keep the border shape rounded
+                ),
             value = value,
             onValueChange = onValueChange,
             leadingIcon = leadingIcon,
@@ -51,7 +61,12 @@ fun MyTextField(
         )
     } else {
         TextTextField(
-            modifier = modifier,
+            modifier = modifier.clip(RoundedCornerShape(12.dp))  // Apply rounded corners
+                .border(
+                    width = 2.dp,  // Set the border width
+                    color = Color.LightGray,  // Set the border color (you can replace with any color)
+                    shape = RoundedCornerShape(12.dp)  // Keep the border shape rounded
+                ),
             value = value,
             onValueChange = onValueChange,
             leadingIcon = leadingIcon,

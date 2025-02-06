@@ -2,6 +2,7 @@ package com.example.studentclubs.register.screen
 
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -13,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Email
@@ -28,12 +31,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.studentclubs.R
 import com.example.studentclubs.register.utils.AuthOption
@@ -42,12 +49,15 @@ import com.example.studentclubs.register.utils.MyTextField
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun LoginScreen(modifier: Modifier = Modifier,navController: NavHostController) {
+fun LoginScreen(navController: NavHostController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    BackHandler{
+        // Hech narsa qilmaslik, orqa tugmasi bosilganda hech narsa bajarilmaydi
+    }
 
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.SpaceAround
@@ -74,10 +84,10 @@ fun LoginScreen(modifier: Modifier = Modifier,navController: NavHostController) 
         MyTextField(
             value = email,
             onValueChange = { email = it },
-            hint = "Email",
+            hint = "UserName",
             leadingIcon = Icons.Outlined.Email,
             trailingIcon = Icons.Outlined.Check,
-            keyboardType = KeyboardType.Email,
+            keyboardType = KeyboardType.Text,
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -96,6 +106,8 @@ fun LoginScreen(modifier: Modifier = Modifier,navController: NavHostController) 
                 Log.d("LoginScreen", "Login clicked with Email: $email, Password: $password")
                 if(email=="Quvonchbek"&& password=="Gafurov") {
                     navController.navigate("admin")
+                }else if (email=="55555"&& password=="55555"){
+                    navController.navigate("student")
                 }
             },
             modifier = Modifier.fillMaxWidth()
@@ -119,10 +131,10 @@ fun LoginScreen(modifier: Modifier = Modifier,navController: NavHostController) 
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround
         ) {
-            AuthOption(image = R.drawable.man)
-            AuthOption(image = R.drawable.man)
+            AuthOption(image = R.drawable.google)
+            AuthOption(image = R.drawable.apple)
             AuthOption(
-                image = R.drawable.man,
+                image = R.drawable.facebook,
                 tint = MaterialTheme.colorScheme.onBackground
             )
         }
@@ -147,4 +159,10 @@ fun LoginScreen(modifier: Modifier = Modifier,navController: NavHostController) 
 
         Spacer(modifier = Modifier.height(1.dp))
     }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun LoginScreenPreview() {
+    LoginScreen(navController = NavHostController(LocalContext.current))
 }

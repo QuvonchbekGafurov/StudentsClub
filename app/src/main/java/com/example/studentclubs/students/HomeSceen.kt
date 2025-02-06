@@ -1,6 +1,8 @@
 package com.example.studentclubs.students
 
 
+import android.content.Context
+import android.widget.Button
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,12 +17,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
@@ -28,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -48,8 +57,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.studentclubs.R
 import com.example.studentclubs.loadEventsFromJson
 import com.example.studentclubs.students.data.EventViewModel
-import com.example.studentclubs.students.data.room.event.EventEntity
+import com.example.studentclubs.students.data.event.EventEntity
 import com.example.studentclubs.toEventEntity
+import com.example.studentclubs.ui.theme.maincolor
+import javax.annotation.meta.When
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,18 +69,8 @@ fun HomeScreen(innerPadding: PaddingValues) {
     val eventViewModel: EventViewModel = hiltViewModel()
 
     // Eventlarni observer qilish
-    val events by eventViewModel.allEvents.observeAsState(emptyList())
+    val events by eventViewModel.allEvents.collectAsState(emptyList())
 
-    // JSON dan kelgan eventlarni olish va Room ga qo'shish
-    val eventsFromJson = loadEventsFromJson(context)
-    LaunchedEffect(eventsFromJson) {
-        eventsFromJson.forEach { event ->
-            val eventEntity = event.toEventEntity()
-            if (!events.any { it.id == eventEntity.id }) {
-                eventViewModel.insertOrUpdateEvent(eventEntity)
-            }
-        }
-    }
 
     val jobCategories = listOf(
         "Barchasi", "Sport", "San'at va Madaniyat", "Tadbirlar va Festivallar",
@@ -81,7 +82,10 @@ fun HomeScreen(innerPadding: PaddingValues) {
     val sheetState = rememberModalBottomSheetState()
     var isSheetOpen by remember { mutableStateOf(false) } // BottomSheet ochiq yoki yo'qligini nazorat qilish uchun
 
-    Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(innerPadding)
+        .padding(horizontal = 10.dp)) {
         // LazyRow orqali filter qilish
         LazyRow(
             modifier = Modifier.fillMaxWidth(),
@@ -104,13 +108,7 @@ fun HomeScreen(innerPadding: PaddingValues) {
                 }
             }
         }
-
-        Text(
-            text = "Вакансии для вас",
-            color = Color.White,
-            fontSize = 25.sp,
-            modifier = Modifier.padding(vertical = 10.dp)
-        )
+        Spacer(modifier = Modifier.height(10.dp))
 
         // Filterlangan eventlar ro'yxati
         val filteredEvents = remember(selectedCategory.value, events) {
@@ -185,7 +183,9 @@ fun JobItem(jobTitle: EventEntity, onClick: () -> Unit) {
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
                     )
                     Text(text = "${jobTitle.description}",
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp),
                         maxLines = 4,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -210,16 +210,71 @@ fun JobItem(jobTitle: EventEntity, onClick: () -> Unit) {
 }
 @Composable
 fun BottomSheetContent(event: EventEntity) {
+    val eventViewModel: EventViewModel = hiltViewModel()
+
+    // participant qiymatini lokal state sifatida saqlash
+    var participantState by remember { mutableStateOf(event.participant) }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        Text(text = event.description, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        Row {
+            val statusText = when (participantState) {
+                0 -> "Clubga qo'shiling"
+                1 -> "Siz Clubga a'zosiz"
+                2 -> "Kutilmoqda"
+                else -> "Noma'lum holat"
+            }
+
+            Text(
+                text = statusText,
+                fontSize = 20.sp
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Box(
+                modifier = Modifier
+                    .background(Color.Transparent, shape = RoundedCornerShape(12.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                when (participantState) {
+                    0 -> Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Add icon",
+                        tint = Color.Red,
+                        modifier = Modifier
+                            .size(30.dp)
+                            .clickable {
+                                participantState = 2 // UI ni yangilash
+                                eventViewModel.updateParticipant(event, 2) // ViewModel orqali DB ni yangilash
+                            }
+                    )
+
+                    1 -> Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Check icon",
+                        tint = Color.Green,
+                        modifier = Modifier.size(30.dp)
+                    )
+
+                    2 -> Icon(
+                        imageVector = Icons.Default.Timer,
+                        contentDescription = "Timer icon",
+                        tint = maincolor,
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+            }
+        }
+
+        Text(text = "${event.category}  ", fontSize = 20.sp, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(10.dp))
-        Text(text = "Kategoriya: ${event.category}", fontSize = 16.sp, color = Color.Gray)
-        Spacer(modifier = Modifier.height(10.dp))
+        Text(text = "Tashkilotchi : ${event.leader}", fontSize = 14.sp)
+        Text(text = "date : ${event.activeDate}", fontSize = 14.sp)
+        Text(text = "manzil : ${event.loc}", fontSize = 14.sp)
         Text(text = "Tavsif:", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-        Text(text = event.description, fontSize = 14.sp)
+        Text(text = event.description, fontSize = 16.sp)
     }
 }
